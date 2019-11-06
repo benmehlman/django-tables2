@@ -356,7 +356,6 @@ class TableBase:
         if request:
             RequestConfig(request).configure(self)
 
-        self._counter = count()
 
     def get_top_pinned_data(self):
         """
