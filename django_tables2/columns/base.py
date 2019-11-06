@@ -167,9 +167,8 @@ class LinkTransform:
     def get_callback(cls, *args, **kwargs):
         """
         This method constructs a LinkTransform and returns a callback function suitable as the linkify
-        parameter of Column.__init__()  This may be used to access features of LinkTransform which aren't
-        exposed via linkify dict or tuple linkify values, for example, constructing a url which has both
-        positional args AND a query string.
+        parameter of ``Column.__init__()``  This may be used if you wish to subclass LinkTransform or to access
+        (future) features of LinkTransform which may not be exposed via ``linkify``.
         """
         link_transform = cls(*args, **kwargs)
 
@@ -236,7 +235,9 @@ class Column:
              - If `True`, the ``record.get_absolute_url()`` or the related model's
                `get_absolute_url()` is used.
              - If a callable is passed, the returned value is used, if it's not ``None``.
-             - If a `dict` is passed, it's passed on to ``~django.urls.reverse``.
+             - If a `dict` is passed, optional items named ``query`` (dict), and ``fragment`` (str), 
+               if present, specify the query string and fragment (hash) elements of the url.  
+               The remaining items are passed on to ``~django.urls.reverse`` as kwargs.
              - If a `tuple` is passed, it must be either a (viewname, args) or (viewname, kwargs)
                tuple, which is also passed to ``~django.urls.reverse``.
 
@@ -325,8 +326,8 @@ class Column:
         elif isinstance(linkify, (list, tuple)):
             link_kwargs = dict(reverse_args=linkify)
         elif isinstance(linkify, dict):
-            # specific uppercase keys in linkify are understood to be link_kwargs, and the rest must be reverse_args
-            link_kwargs = { name.lower(): linkify.pop(name) for name in ('QUERY', 'FRAGMENT') if name in linkify }
+            # specific keys in linkify are understood to be link_kwargs, and the rest must be reverse_args
+            link_kwargs = { name: linkify.pop(name) for name in ('query', 'fragment') if name in linkify }
             link_kwargs['reverse_args'] = linkify
         elif linkify is True:
             link_kwargs = dict(accessor=self.accessor)
